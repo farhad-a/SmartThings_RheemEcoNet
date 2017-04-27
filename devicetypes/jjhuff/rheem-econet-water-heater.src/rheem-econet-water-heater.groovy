@@ -18,6 +18,7 @@
  */
 metadata {
 	definition (name: "Rheem Econet Water Heater", namespace: "jjhuff", author: "Justin Huff") {
+        capability "Thermostat"
 		capability "Actuator"
 		capability "Refresh"
 		capability "Sensor"
@@ -50,6 +51,18 @@ metadata {
 		standardTile("heatLevelDown", "device.switch", canChangeIcon: false, decoration: "flat") {
 			state("heatLevelDown", action:"heatLevelDown", icon:"st.thermostat.thermostat-down", backgroundColor:"#F7C4BA")
 		}
+		standardTile("operatingMode", "device.operatingMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state("Energy Saver",        action:"switchMode",    nextState: "Energy Saver",        label: 'Enrgy Save')
+			state("Heat Pump Only",      action:"switchMode",    nextState: "Heat Pump Only",      label: 'Heat Pump')
+			state("High Demand",         action:"switchMode",    nextState: "High Demand",         label: 'High Dem')
+			state("Off",                 action:"switchMode",    nextState: "Off",                 label: 'Off')
+			state("Electric-Only",       action:"switchMode",    nextState: "Electric-Only",       label: 'Electic')
+		}
+
+		standardTile("vacation", "device.vacation", canChangeIcon: false, decoration: "flat" ) {
+       		state "Home", label: 'Home', backgroundColor: "#0063d6"
+       		state("Away", label: 'Away', backgroundColor: "#66a8f4")
+		}
 
 		standardTile("switch", "device.switch", canChangeIcon: false, decoration: "flat" ) {
        		state "on", label: 'On', action: "switch.off",
@@ -63,7 +76,7 @@ metadata {
 		}
         
 		main "heatingSetpoint"
-		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "refresh"])
+		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "operatingMode", "vacation", "refresh"])
 	}
 }
 
@@ -106,5 +119,7 @@ def heatLevelDown() {
 
 def updateDeviceData(data) {
 	sendEvent(name: "heatingSetpoint", value: data.setPoint, unit: "F")
-    sendEvent(name: "switch", value: data.isEnabled ? "on" : "off")
+    sendEvent(name: "switch", value: data.inUse ? "on" : "off")
+    sendEvent(name: "operatingMode", value: data.mode)
+    sendEvent(name: "vacation", value: data.isOnVacation? "Away":"Home")
 }
