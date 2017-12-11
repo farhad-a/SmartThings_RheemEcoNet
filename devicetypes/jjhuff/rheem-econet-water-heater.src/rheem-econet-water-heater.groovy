@@ -27,6 +27,7 @@ metadata {
 		
 		command "heatLevelUp"
 		command "heatLevelDown"
+        command "togglevacation"
 		command "updateDeviceData", ["string"]
 	}
 
@@ -50,6 +51,9 @@ metadata {
 		}  
 		standardTile("heatLevelDown", "device.switch", canChangeIcon: false, decoration: "flat") {
 			state("heatLevelDown", action:"heatLevelDown", icon:"st.thermostat.thermostat-down", backgroundColor:"#F7C4BA")
+		}
+        standardTile("togglevacation", "device.switch", canChangeIcon: false, decoration: "flat") {
+			state("togglevacation", action:"togglevacation", label:"togglevacation", backgroundColor:"#F7C4BA")
 		}
 		standardTile("operatingMode", "device.operatingMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
 			state("Energy Saver",        action:"switchMode",    nextState: "Energy Saver",        label: 'Enrgy Save')
@@ -76,7 +80,7 @@ metadata {
 		}
         
 		main "heatingSetpoint"
-		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "operatingMode", "vacation", "refresh"])
+		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "operatingMode", "vacation", "refresh","togglevacation"])
 	}
 }
 
@@ -115,6 +119,20 @@ def heatLevelDown() {
 	def setPoint = device.currentValue("heatingSetpoint")
     setPoint = setPoint - 1
     setHeatingSetpoint(setPoint)
+}
+
+def togglevacation(){
+    def currentMode = device.currentValue("vacation")
+    log.debug "Current mode: $currentMode"
+
+    if (currentMode == "Away")
+    {
+      parent.setDeviceOnVacation(this.device, false)
+    }
+    else
+    {
+      parent.setDeviceOnVacation(this.device, true)
+    }
 }
 
 def updateDeviceData(data) {
