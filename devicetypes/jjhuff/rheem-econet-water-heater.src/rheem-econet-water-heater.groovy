@@ -32,6 +32,7 @@ metadata {
         command "RequestEnergySave"
         command "RequestHighDemand"
         command "RequestOff"
+        command "RequestHeatPumpOnly"
 		command "updateDeviceData", ["string"]
 	}
 
@@ -69,20 +70,20 @@ metadata {
 			state("togglevacation", action:"togglevacation", label:"togglevacation", backgroundColor:"#F7C4BA")
 		}
 		standardTile("operatingMode", "device.operatingMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-			state("Energy Saver",   label: 'Enrgy Save')
-			state("Heat Pump Only", label: 'Heat Pump')
-			state("High Demand",    label: 'High Dem')
-			state("Off",            label: 'Off')
-			state("Electric-Only",  label: 'Electic')
+			state("Energy Saver",   label: 'Mode:\nEnrgy Save')
+			state("Heat Pump Only", label: 'Mode:\nHeat Pump')
+			state("High Demand",    label: 'Mode:\nHigh Dem')
+			state("Off",            label: 'Mode:\nOff')
+			state("Electric-Only",  label: 'Mode:\nElectic')
 		}
-        standardTile("EnergySaver", "device.switch", decoration: "flat") {
-			state("default", action:"RequestEnergySave", label: 'Enrgy Save')
+        standardTile("HeatPumpOnly", "device.switch", decoration: "flat") {
+			state("default", action:"RequestHeatPumpOnly", label: 'Rqst:\nHeat Pump')
 		}
         standardTile("HighDemand", "device.switch", decoration: "flat") {
-			state("default", action:"RequestHighDemand", label: 'High Dmd')
+			state("default", action:"RequestHighDemand", label: 'Rqst:\nHigh Dmd')
 		}
         standardTile("Off", "device.switch", decoration: "flat") {
-			state("default", action:"RequestOff", label: 'Off')
+			state("default", action:"RequestOff", label: 'Rqst:\nOff')
 		}
        standardTile("vacation", "device.vacation", canChangeIcon: false, decoration: "flat" ) {
        		state "Home", label: 'Home', backgroundColor: "#0063d6"
@@ -101,7 +102,7 @@ metadata {
 		}
         
 		main "heatingSetpoint"
-		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown","upperTemp","lowerTemp","ambientTemp", "switch", "operatingMode", "refresh","EnergySaver","HighDemand","Off"])
+		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown","upperTemp","lowerTemp","ambientTemp", "switch", "operatingMode", "refresh","HeatPumpOnly","HighDemand","Off"])
 	}
 }
 
@@ -156,7 +157,10 @@ def RequestOff(){
 	parent.setDeviceMode(this.device, "Off")
     parent.refresh()
 }
-
+def RequestHeatPumpOnly(){
+	parent.setDeviceMode(this.device, "Heat Pump Only")
+    parent.refresh()
+}
 def togglevacation(){
     def currentMode = device.currentValue("vacation")
     log.debug "Current mode: $currentMode"
