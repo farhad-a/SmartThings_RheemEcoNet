@@ -24,10 +24,14 @@ metadata {
 		capability "Sensor"
         capability "Switch"
 		capability "Thermostat Heating Setpoint"
+        capability "Temperature Measurement"
 		
 		command "heatLevelUp"
 		command "heatLevelDown"
         command "togglevacation"
+        command "RequestEnergySave"
+        command "RequestHighDemand"
+        command "RequestOff"
 		command "updateDeviceData", ["string"]
 	}
 
@@ -47,13 +51,13 @@ metadata {
 			)
 		}
         standardTile("lowerTemp", "device.lowerTemp"){
-                state("temperature", label:'${currentValue}°')
+                state("temperature", label:'Lower\n${currentValue}°')
         }
         standardTile("ambientTemp","device.ambientTemp"){
-                state("temperature", label:'${currentValue}°')
+                state("temperature", label:'Ambient\n${currentValue}°')
         }
         standardTile("upperTemp", "device.upperTemp"){
-                state("temperature", label:'${currentValue}°')
+                state("temperature", label:'Upper\n${currentValue}°')
         }
 		standardTile("heatLevelUp", "device.switch", canChangeIcon: false, decoration: "flat" ) {
 			state("heatLevelUp",   action:"heatLevelUp",   icon:"st.thermostat.thermostat-up", backgroundColor:"#F7C4BA")
@@ -65,14 +69,22 @@ metadata {
 			state("togglevacation", action:"togglevacation", label:"togglevacation", backgroundColor:"#F7C4BA")
 		}
 		standardTile("operatingMode", "device.operatingMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-			state("Energy Saver",        action:"switchMode",    nextState: "Energy Saver",        label: 'Enrgy Save')
-			state("Heat Pump Only",      action:"switchMode",    nextState: "Heat Pump Only",      label: 'Heat Pump')
-			state("High Demand",         action:"switchMode",    nextState: "High Demand",         label: 'High Dem')
-			state("Off",                 action:"switchMode",    nextState: "Off",                 label: 'Off')
-			state("Electric-Only",       action:"switchMode",    nextState: "Electric-Only",       label: 'Electic')
+			state("Energy Saver",   label: 'Enrgy Save')
+			state("Heat Pump Only", label: 'Heat Pump')
+			state("High Demand",    label: 'High Dem')
+			state("Off",            label: 'Off')
+			state("Electric-Only",  label: 'Electic')
 		}
-
-		standardTile("vacation", "device.vacation", canChangeIcon: false, decoration: "flat" ) {
+        standardTile("EnergySaver", "device.switch", decoration: "flat") {
+			state("default", action:"RequestEnergySave", label: 'Enrgy Save')
+		}
+        standardTile("HighDemand", "device.switch", decoration: "flat") {
+			state("default", action:"RequestHighDemand", label: 'High Dmd')
+		}
+        standardTile("Off", "device.switch", decoration: "flat") {
+			state("default", action:"RequestOff", label: 'Off')
+		}
+       standardTile("vacation", "device.vacation", canChangeIcon: false, decoration: "flat" ) {
        		state "Home", label: 'Home', backgroundColor: "#0063d6"
        		state("Away", label: 'Away', backgroundColor: "#66a8f4")
 		}
@@ -89,7 +101,7 @@ metadata {
 		}
         
 		main "heatingSetpoint"
-		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "operatingMode", "vacation", "refresh","togglevacation","lowerTemp","ambientTemp","upperTemp"])
+		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown","upperTemp","lowerTemp","ambientTemp", "switch", "operatingMode", "refresh","EnergySaver","HighDemand","Off"])
 	}
 }
 
@@ -110,6 +122,7 @@ def off() {
     sendEvent(name: "switch", value: "off")
 }
 
+
 def setHeatingSetpoint(Number setPoint) {
 	/*heatingSetPoint = (heatingSetPoint < deviceData.minTemp)? deviceData.minTemp : heatingSetPoint
 	heatingSetPoint = (heatingSetPoint > deviceData.maxTemp)? deviceData.maxTemp : heatingSetPoint
@@ -128,6 +141,20 @@ def heatLevelDown() {
 	def setPoint = device.currentValue("heatingSetpoint")
     setPoint = setPoint - 1
     setHeatingSetpoint(setPoint)
+}
+
+def RequestEnergySave(){
+	parent.setDeviceMode(this.device, "Energy Saver")
+    parent.refresh()
+}
+
+def RequestHighDemand(){
+	parent.setDeviceMode(this.device, "High Demand")
+    parent.refresh()
+}
+def RequestOff(){
+	parent.setDeviceMode(this.device, "Off")
+    parent.refresh()
 }
 
 def togglevacation(){
