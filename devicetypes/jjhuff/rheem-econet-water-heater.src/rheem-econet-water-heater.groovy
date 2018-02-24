@@ -46,6 +46,15 @@ metadata {
 				]
 			)
 		}
+        standardTile("lowerTemp", "device.lowerTemp"){
+                state("temperature", label:'${currentValue}°')
+        }
+        standardTile("ambientTemp","device.ambientTemp"){
+                state("temperature", label:'${currentValue}°')
+        }
+        standardTile("upperTemp", "device.upperTemp"){
+                state("temperature", label:'${currentValue}°')
+        }
 		standardTile("heatLevelUp", "device.switch", canChangeIcon: false, decoration: "flat" ) {
 			state("heatLevelUp",   action:"heatLevelUp",   icon:"st.thermostat.thermostat-up", backgroundColor:"#F7C4BA")
 		}  
@@ -80,7 +89,7 @@ metadata {
 		}
         
 		main "heatingSetpoint"
-		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "operatingMode", "vacation", "refresh","togglevacation"])
+		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown", "switch", "operatingMode", "vacation", "refresh","togglevacation","lowerTemp","ambientTemp","upperTemp"])
 	}
 }
 
@@ -140,4 +149,7 @@ def updateDeviceData(data) {
     sendEvent(name: "switch", value: data.inUse ? "on" : "off")
     sendEvent(name: "operatingMode", value: data.mode)
     sendEvent(name: "vacation", value: data.isOnVacation? "Away":"Home")
+    sendEvent(name: "lowerTemp", value: data.lowerTemp as Integer)
+    sendEvent(name: "ambientTemp", value: data.ambientTemp as Integer)
+    sendEvent(name: "upperTemp", value: data.upperTemp as Integer)
 }
