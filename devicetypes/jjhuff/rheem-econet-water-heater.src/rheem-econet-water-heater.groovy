@@ -22,7 +22,6 @@ metadata {
 		capability "Actuator"
 		capability "Refresh"
 		capability "Sensor"
-        capability "Switch"
 		capability "Thermostat Heating Setpoint"
         capability "Temperature Measurement"
 		
@@ -38,9 +37,32 @@ metadata {
 
 	simulator { }
 
-	tiles {
-		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, width: 2, height: 2) {
-			state("heatingSetpoint", label:'${currentValue}°',
+	tiles(scale: 2)  {
+    multiAttributeTile(name:"thermostatFull", type:"thermostat", width:6, height:4) {
+    tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
+        attributeState("temp", label:'${currentValue}', unit:"dF", defaultState: true)
+    }
+    tileAttribute("device.heatingSetpoint", key: "VALUE_CONTROL") {
+        attributeState("VALUE_UP", action: "heatLevelUp")
+        attributeState("VALUE_DOWN", action: "heatLevelDown")
+    }
+    tileAttribute("device.thermostatOperatingState", key: "OPERATING_STATE") {
+        attributeState("idle", backgroundColor:"#00A0DC")
+        attributeState("heating", backgroundColor:"#e86d13")
+    }
+    tileAttribute("device.thermostatMode", key: "THERMOSTAT_MODE") {
+        attributeState("Energy Saver", label:'${name}')
+        attributeState("Heat Pump Only", label:'${name}')
+        attributeState("High Demand", label:'${name}')
+        attributeState("Off", label:'${name}')
+        attributeState("Electric-Only", label:'${name}')
+    }
+    tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
+        attributeState("heatingSetpoint", label:'${currentValue}', unit:"dF", defaultState: true)
+    }
+    }
+        valueTile("uppertemperature", "device.temperature", inactiveLabel: false, width: 2, height: 2) {
+			state("temp", label:'${currentValue}°',
 				backgroundColors:[
 					[value: 90,  color: "#f49b88"],
 					[value: 100, color: "#f28770"],
@@ -51,58 +73,63 @@ metadata {
 				]
 			)
 		}
-        standardTile("lowerTemp", "device.lowerTemp"){
-                state("temperature", label:'Lower\n${currentValue}°')
+        
+        standardTile("ambientTemp","device.ambientTemp", decoration: "flat",width: 3, height: 2){
+                state("temperature", label:'Ambient\n${currentValue}°',
+                backgroundColors:[
+                        // Fahrenheit color set
+                        [value: 0, color: "#153591"],
+                        [value: 5, color: "#1e9cbb"],
+                        [value: 10, color: "#90d2a7"],
+                        [value: 15, color: "#44b621"],
+                        [value: 20, color: "#f1d801"],
+                        [value: 25, color: "#d04e00"],
+                        [value: 30, color: "#bc2323"],
+                        [value: 44, color: "#1e9cbb"],
+                        [value: 59, color: "#90d2a7"],
+                        [value: 74, color: "#44b621"],
+                        [value: 84, color: "#f1d801"],
+                        [value: 95, color: "#d04e00"],
+                        [value: 96, color: "#bc2323"]
+						// Celsius color set (to switch, delete the 13 lines above anmd remove the two slashes at the beginning of the line below)
+                        //[value: 0, color: "#153591"], [value: 7, color: "#1e9cbb"], [value: 15, color: "#90d2a7"], [value: 23, color: "#44b621"], [value: 28, color: "#f1d801"], [value: 35, color: "#d04e00"], [value: 37, color: "#bc2323"]
+                    ]
+                )
         }
-        standardTile("ambientTemp","device.ambientTemp"){
-                state("temperature", label:'Ambient\n${currentValue}°')
+        standardTile("lowerTemp", "device.lowerTemp", decoration: "flat", width: 3, height: 2){
+                state("temperature", label:'Lower\n${currentValue}°',
+                backgroundColors:[
+					[value: 90,  color: "#f49b88"],
+					[value: 100, color: "#f28770"],
+					[value: 110, color: "#f07358"],
+					[value: 120, color: "#ee5f40"],
+					[value: 130, color: "#ec4b28"],
+					[value: 140, color: "#ea3811"]					
+				]
+                )
         }
-        standardTile("upperTemp", "device.upperTemp"){
-                state("temperature", label:'Upper\n${currentValue}°')
-        }
-		standardTile("heatLevelUp", "device.switch", canChangeIcon: false, decoration: "flat" ) {
-			state("heatLevelUp",   action:"heatLevelUp",   icon:"st.thermostat.thermostat-up", backgroundColor:"#F7C4BA")
-		}  
-		standardTile("heatLevelDown", "device.switch", canChangeIcon: false, decoration: "flat") {
-			state("heatLevelDown", action:"heatLevelDown", icon:"st.thermostat.thermostat-down", backgroundColor:"#F7C4BA")
-		}
-        standardTile("togglevacation", "device.switch", canChangeIcon: false, decoration: "flat") {
-			state("togglevacation", action:"togglevacation", label:"togglevacation", backgroundColor:"#F7C4BA")
-		}
-		standardTile("operatingMode", "device.operatingMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-			state("Energy Saver",   label: 'Mode:\nEnrgy Save')
-			state("Heat Pump Only", label: 'Mode:\nHeat Pump')
-			state("High Demand",    label: 'Mode:\nHigh Dem')
-			state("Off",            label: 'Mode:\nOff')
-			state("Electric-Only",  label: 'Mode:\nElectic')
-		}
-        standardTile("HeatPumpOnly", "device.switch", decoration: "flat") {
+        standardTile("HeatPumpOnly", "device.switch", decoration: "flat", width: 2, height: 2) {
 			state("default", action:"RequestHeatPumpOnly", label: 'Rqst:\nHeat Pump')
 		}
-        standardTile("HighDemand", "device.switch", decoration: "flat") {
+        standardTile("HighDemand", "device.switch", decoration: "flat", width: 2, height: 2) {
 			state("default", action:"RequestHighDemand", label: 'Rqst:\nHigh Dmd')
 		}
-        standardTile("Off", "device.switch", decoration: "flat") {
+        standardTile("Off", "device.switch", decoration: "flat", width: 2, height: 2) {
 			state("default", action:"RequestOff", label: 'Rqst:\nOff')
 		}
        standardTile("vacation", "device.vacation", canChangeIcon: false, decoration: "flat" ) {
        		state "Home", label: 'Home', backgroundColor: "#0063d6"
        		state("Away", label: 'Away', backgroundColor: "#66a8f4")
 		}
+        
+        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat")
+        {
+            state "default", action:"refresh.refresh", icon: "st.secondary.refresh"
+        }
 
-		standardTile("switch", "device.switch", canChangeIcon: false, decoration: "flat" ) {
-       		state "on", label: 'On', action: "switch.off",
-          		icon: "st.switches.switch.on", backgroundColor: "#79b821"
-       		state("off", label: 'Off', action: "switch.on",
-          		icon: "st.switches.switch.off", backgroundColor: "#ffffff")
-		}
-        
-		standardTile("refresh", "device.switch", decoration: "flat") {
-			state("default", action:"refresh.refresh",        icon:"st.secondary.refresh")
-		}
-        
-		main "heatingSetpoint"
-		details(["heatingSetpoint", "heatLevelUp", "heatLevelDown","upperTemp","lowerTemp","ambientTemp", "switch", "operatingMode", "refresh","HeatPumpOnly","HighDemand","Off"])
+              
+		main "uppertemperature"
+		details(["thermostatFull","lowerTemp","ambientTemp","HeatPumpOnly","HighDemand","Off", "refresh"])
 	}
 }
 
@@ -113,23 +140,13 @@ def refresh() {
 	parent.refresh()
 }
 
-def on() {
-   	parent.setDeviceEnabled(this.device, true)
-    sendEvent(name: "switch", value: "off")
-}
-
-def off() {
-   	parent.setDeviceEnabled(this.device, false)
-    sendEvent(name: "switch", value: "off")
-}
-
-
 def setHeatingSetpoint(Number setPoint) {
 	/*heatingSetPoint = (heatingSetPoint < deviceData.minTemp)? deviceData.minTemp : heatingSetPoint
 	heatingSetPoint = (heatingSetPoint > deviceData.maxTemp)? deviceData.maxTemp : heatingSetPoint
     */
    	sendEvent(name: "heatingSetpoint", value: setPoint, unit: "F")
 	parent.setDeviceSetPoint(this.device, setPoint)
+    refresh()
 }
 
 def heatLevelUp() { 
@@ -161,26 +178,13 @@ def RequestHeatPumpOnly(){
 	parent.setDeviceMode(this.device, "Heat Pump Only")
     parent.refresh()
 }
-def togglevacation(){
-    def currentMode = device.currentValue("vacation")
-    log.debug "Current mode: $currentMode"
 
-    if (currentMode == "Away")
-    {
-      parent.setDeviceOnVacation(this.device, false)
-    }
-    else
-    {
-      parent.setDeviceOnVacation(this.device, true)
-    }
-}
 
 def updateDeviceData(data) {
 	sendEvent(name: "heatingSetpoint", value: data.setPoint, unit: "F")
-    sendEvent(name: "switch", value: data.inUse ? "on" : "off")
-    sendEvent(name: "operatingMode", value: data.mode)
-    sendEvent(name: "vacation", value: data.isOnVacation? "Away":"Home")
+    sendEvent(name: "thermostatOperatingState", value: data.inUse ? "heating" : "idle")
+    sendEvent(name: "thermostatMode", value: data.mode)
     sendEvent(name: "lowerTemp", value: data.lowerTemp as Integer)
     sendEvent(name: "ambientTemp", value: data.ambientTemp as Integer)
-    sendEvent(name: "upperTemp", value: data.upperTemp as Integer)
+    sendEvent(name: "temperature", value: data.upperTemp as Integer)
 }
