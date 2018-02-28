@@ -32,6 +32,7 @@ metadata {
         command "RequestHighDemand"
         command "RequestOff"
         command "RequestHeatPumpOnly"
+        command "RequestElectricOnly"
 		command "updateDeviceData", ["string"]
 	}
 
@@ -47,15 +48,15 @@ metadata {
         attributeState("VALUE_DOWN", action: "heatLevelDown")
     }
     tileAttribute("device.thermostatOperatingState", key: "OPERATING_STATE") {
-        attributeState("idle", backgroundColor:"#00A0DC")
-        attributeState("heating", backgroundColor:"#e86d13")
+        attributeState("idle", label:'${name}', backgroundColor:"#228B22")
+        attributeState("heating", label:'${name}', backgroundColor:"#FF0000")
     }
-    tileAttribute("device.thermostatMode", key: "THERMOSTAT_MODE") {
-        attributeState("Energy Saver", label:'${name}')
-        attributeState("Heat Pump Only", label:'${name}')
-        attributeState("High Demand", label:'${name}')
-        attributeState("Off", label:'${name}')
-        attributeState("Electric-Only", label:'${name}')
+    tileAttribute("device.thermostatMode", key: "SECONDARY_CONTROL") {
+        attributeState("Energy Saver", label:'${name}', icon:"none")
+        attributeState("Heat Pump Only", label:'${name}', icon:"none")
+        attributeState("High Demand", label:'${name}', icon:"none")
+        attributeState("Off", label:'${name}', icon:"none")
+        attributeState("Electric-Only", label:'${name}', icon:"none")
     }
     tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
         attributeState("heatingSetpoint", label:'${currentValue}', unit:"dF", defaultState: true)
@@ -117,19 +118,20 @@ metadata {
         standardTile("Off", "device.switch", decoration: "flat", width: 2, height: 2) {
 			state("default", action:"RequestOff", label: 'Rqst:\nOff')
 		}
-       standardTile("vacation", "device.vacation", canChangeIcon: false, decoration: "flat" ) {
-       		state "Home", label: 'Home', backgroundColor: "#0063d6"
-       		state("Away", label: 'Away', backgroundColor: "#66a8f4")
+        standardTile("EnergySaver", "device.switch", decoration: "flat", width: 2, height: 2) {
+			state("default", action:"RequestEnergySave", label: 'Rqst:\nEnrgy Sav')
 		}
-        
-        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat")
+        standardTile("ElectricOnly", "device.switch", decoration: "flat", width: 2, height: 2) {
+			state("default", action:"RequestElectricOnly", label: 'Rqst:\nElec Only')
+		}
+        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 2, height: 2)
         {
             state "default", action:"refresh.refresh", icon: "st.secondary.refresh"
         }
 
               
 		main "uppertemperature"
-		details(["thermostatFull","lowerTemp","ambientTemp","HeatPumpOnly","HighDemand","Off", "refresh"])
+		details(["thermostatFull","lowerTemp","ambientTemp","HeatPumpOnly","HighDemand","Off", "EnergySaver", "ElectricOnly", "refresh"])
 	}
 }
 
@@ -178,7 +180,10 @@ def RequestHeatPumpOnly(){
 	parent.setDeviceMode(this.device, "Heat Pump Only")
     parent.refresh()
 }
-
+def RequestElectricOnly(){
+	parent.setDeviceMode(this.device, "Electric-Only")
+    parent.refresh()
+}
 
 def updateDeviceData(data) {
 	sendEvent(name: "heatingSetpoint", value: data.setPoint, unit: "F")
