@@ -17,20 +17,20 @@
  *  Based on https://github.com/copy-ninja/SmartThings_RheemEcoNet
  */
 metadata {
-  definition (name: "Rheem Econet Water Heater", namespace: "jjhuff", author: "Justin Huff") {
+  definition (name: "Rheem Econet Water Heater", namespace: "jjhuff", author: "Justin Huff", ocfDeviceType: "oic.d.waterheater") {
     capability "Actuator"
     capability "Refresh"
     capability "Sensor"
     capability "Switch"
     capability "Thermostat Heating Setpoint"
-    
+
     command "heatLevelUp"
     command "heatLevelDown"
     command "updateDeviceData", ["string"]
   }
-  
+
   simulator { }
-  
+
   tiles(scale: 2) {
     multiAttributeTile(name: "heatingSetpoint", type: "thermostat", width: 6, height: 4) {
       tileAttribute("device.heatingSetpoint", key: "PRIMARY_CONTROL") {
@@ -53,32 +53,31 @@ metadata {
         attributeState("VALUE_DOWN", action: "heatLevelDown")
       }
     }
-    
+
     valueTile("heatingSetpointValue", "device.heatingSetpoint", inactiveLabel: false, width: 4, height: 4) {
       state("heatingSetpoint", label: '${currentValue}\u00b0', backgroundColors: getTempColors())
     }
-    
+
     standardTile("heatLevelUp", "device.switch", canChangeIcon: false, decoration: "flat", width: 2, height: 2) {
       state("heatLevelUp",   action: "heatLevelUp", icon: "st.thermostat.thermostat-up", backgroundColor: "#F7C4BA")
     }
-    
+
     standardTile("heatLevelDown", "device.switch", canChangeIcon: false, decoration: "flat", width: 2, height: 2) {
       state("heatLevelDown", action: "heatLevelDown", icon: "st.thermostat.thermostat-down", backgroundColor: "#F7C4BA")
     }
-    
+
     standardTile("switch", "device.switch", canChangeIcon: false, decoration: "flat", width: 2, height: 2) {
       state("off", label: "Off", action: "switch.on", icon: "st.Weather.weather12", backgroundColor: "#cccccc", nextState: "turningOn")
       state("turningOn", label: "On...", icon: "st.Weather.weather12", backgroundColor: "#e86d13", nextState: "on")
       state("on", label: "On", action: "switch.off", icon: "st.Weather.weather12", backgroundColor: "#e86d13", nextState: "turningOff")
       state("turningOff", label: "Off...", icon: "st.Weather.weather12", backgroundColor: "#cccccc", nextState: "off")
     }
-    
+
     standardTile("refresh", "device.switch", decoration: "flat", width: 2, height: 2) {
       state("default", action: "refresh.refresh", icon: "st.secondary.refresh")
     }
-    
-    main("switch")
-    // details(["heatingSetpoint", "heatingSetpointValue", "heatLevelUp", "heatLevelDown", "switch", "refresh"])
+
+    main("heatingSetpoint")
     details([
       "heatingSetpoint",
       "switch",
