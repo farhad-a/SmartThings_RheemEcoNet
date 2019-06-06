@@ -86,7 +86,7 @@ def uninstalled() {
 def initialize() {
   // Set initial states
   state.polling = [ last: 0, rescheduler: now() ]
-  
+
   // Create selected devices
   def waterHeaterList = getWaterHeaterList()
   def selectedDevices = []+ getSelectedDevices("waterheater")
@@ -101,18 +101,18 @@ def initialize() {
       }
     }
   }
-  
+
   // Remove unselected devices
   /*def deleteDevices = (selectedDevices) ? (getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }) : getAllChildDevices()
    deleteDevices.each { deleteChildDevice(it.deviceNetworkId) } */
-  
+
   //Subscribes to sunrise and sunset event to trigger refreshes
   subscribe(location, "sunrise", runRefresh)
   subscribe(location, "sunset", runRefresh)
   subscribe(location, "mode", runRefresh)
   subscribe(location, "sunriseTime", runRefresh)
   subscribe(location, "sunsetTime", runRefresh)
-  
+
   //Refresh devices
   runRefresh()
 }
@@ -145,11 +145,11 @@ def refresh() {
   if (!login()) {
     return
   }
-  
+
   log.info "Refreshing data..."
   // update last refresh
   state.polling?.last = now()
-  
+
   // get all the children and send updates
   getAllChildDevices().each {
     def id = it.deviceNetworkId
@@ -159,9 +159,9 @@ def refresh() {
         it.updateDeviceData(response.data)
       }
     }
-    
+
   }
-  
+
   //schedule the rescheduler to schedule refresh ;)
   if ((state.polling?.rescheduler?:0) + 2400000 < now()) {
     log.info "Scheduling Auto Rescheduler.."
@@ -178,31 +178,39 @@ def runRefresh(evt) {
     log.info "Scheduling Auto Refresh.."
     schedule("* */" + ((settings.polling?.toInteger()?:1>0)?:1) + " * * * ?", refresh)
   }
-  
+
   // Force Refresh NOWWW!!!!
   refresh()
-  
+
   //Update rescheduler's last run
   if (!evt) state.polling?.rescheduler = now()
 }
 
 def setDeviceSetPoint(childDevice, setpoint) {
-  log.info "setDeviceSetPoint: $childDevice.deviceNetworkId $setpoint"
+  runIn(5, setDeviceSetPointHandler, [data: [childDevice: childDevice, setpoint: setpoint]])
+}
+
+def setDeviceSetPointHandler(data) {
+  log.info "setDeviceSetPoint: $data.childDevice.deviceNetworkId $setpoint"
   if (login()) {
-    apiPut("/equipment/$childDevice.deviceNetworkId", [
+    apiPut("/equipment/$data.childDevice.deviceNetworkId", [
       body: [
-        setPoint: setpoint,
+        setPoint: data.setpoint,
       ]
     ])
   }
-  
 }
+
 def setDeviceEnabled(childDevice, enabled) {
-  log.info "setDeviceEnabled: $childDevice.deviceNetworkId $enabled"
+  runIn(1, setDeviceEnabledHandler, [data: [childDevice: childDevice, enabled: enabled]])
+}
+
+def setDeviceEnabledHandler(data) {
+  log.info "setDeviceEnabled: $data.childDevice.deviceNetworkId $data.enabled"
   if (login()) {
-    apiPut("/equipment/$childDevice.deviceNetworkId", [
+    apiPut("/equipment/$data.childDevice.deviceNetworkId", [
       body: [
-        isEnabled: enabled,
+        isEnabled: data.enabled,
       ]
     ])
   }
@@ -272,7 +280,7 @@ private apiPut(apiPath, apiParams = [], callback = {}) {
     headers: ["Authorization": getApiAuth()],
     requestContentType: "application/json",
   ] + apiParams
-  
+
   try {
     httpPut(apiParams) { response ->  callback(response) }
   }	catch (e)	{
