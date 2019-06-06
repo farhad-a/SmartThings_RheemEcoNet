@@ -126,6 +126,7 @@ def heatLevelDown() {
 }
 
 def updateDeviceData(data) {
+  state.data = data;
   sendEvent(name: "heatingSetpoint", value: data.setPoint, unit: "F")
   sendEvent(name: "switch", value: data.isEnabled ? "on" : "off")
 }
