@@ -86,8 +86,6 @@ metadata {
   }
 }
 
-def parse(String description) { }
-
 def refresh() {
   log.debug "refresh"
   parent.refresh()
@@ -95,14 +93,14 @@ def refresh() {
 
 def on() {
   log.debug "on"
-  sendEvent(name: "switch", value: "on")
   parent.setDeviceEnabled(this.device, true)
+  sendEvent(name: "switch", value: "on")
 }
 
 def off() {
   log.debug "off"
-  sendEvent(name: "switch", value: "off")
   parent.setDeviceEnabled(this.device, false)
+  sendEvent(name: "switch", value: "off")
 }
 
 def setHeatingSetpoint(Number setPoint) {
@@ -111,8 +109,8 @@ def setHeatingSetpoint(Number setPoint) {
     heatingSetPoint = (heatingSetPoint < deviceData.minTemp)? deviceData.minTemp : heatingSetPoint
     heatingSetPoint = (heatingSetPoint > deviceData.maxTemp)? deviceData.maxTemp : heatingSetPoint
   */
-  sendEvent(name: "heatingSetpoint", value: setPoint, unit: "F")
   parent.setDeviceSetPoint(this.device, setPoint)
+  sendEvent(name: "heatingSetpoint", value: setPoint, unit: "F")
 }
 
 def heatLevelUp() {
