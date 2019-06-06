@@ -159,7 +159,6 @@ def refresh() {
         it.updateDeviceData(response.data)
       }
     }
-
   }
 
   //schedule the rescheduler to schedule refresh ;)
@@ -191,7 +190,7 @@ def setDeviceSetPoint(childDevice, setpoint) {
 }
 
 def setDeviceSetPointHandler(data) {
-  log.info "setDeviceSetPoint: $data.childDevice.deviceNetworkId $setpoint"
+  log.info "setDeviceSetPoint: $data.childDevice.deviceNetworkId $data.setpoint"
   if (login()) {
     apiPut("/equipment/$data.childDevice.deviceNetworkId", [
       body: [
