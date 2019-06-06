@@ -95,23 +95,24 @@ def refresh() {
 
 def on() {
   log.debug "on"
-  parent.setDeviceEnabled(this.device, true)
   sendEvent(name: "switch", value: "on")
+  parent.setDeviceEnabled(this.device, true)
 }
 
 def off() {
   log.debug "off"
-  parent.setDeviceEnabled(this.device, false)
   sendEvent(name: "switch", value: "off")
+  parent.setDeviceEnabled(this.device, false)
 }
 
 def setHeatingSetpoint(Number setPoint) {
   log.debug setPoint + "\u00b0"
-  /*heatingSetPoint = (heatingSetPoint < deviceData.minTemp)? deviceData.minTemp : heatingSetPoint
-   heatingSetPoint = (heatingSetPoint > deviceData.maxTemp)? deviceData.maxTemp : heatingSetPoint
-   */
-  parent.setDeviceSetPoint(this.device, setPoint)
+  /*
+    heatingSetPoint = (heatingSetPoint < deviceData.minTemp)? deviceData.minTemp : heatingSetPoint
+    heatingSetPoint = (heatingSetPoint > deviceData.maxTemp)? deviceData.maxTemp : heatingSetPoint
+  */
   sendEvent(name: "heatingSetpoint", value: setPoint, unit: "F")
+  parent.setDeviceSetPoint(this.device, setPoint)
 }
 
 def heatLevelUp() {
