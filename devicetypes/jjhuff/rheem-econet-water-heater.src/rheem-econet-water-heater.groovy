@@ -104,11 +104,10 @@ def off() {
 }
 
 def setHeatingSetpoint(Number setPoint) {
+  setPoint = (setPoint < state.minSetPoint) ? state.minSetPoint : setPoint
+  setPoint = (setPoint > state.maxSetPoint) ? state.maxSetPoint : setPoint
   log.debug setPoint + "\u00b0"
-  /*
-    heatingSetPoint = (heatingSetPoint < deviceData.minTemp)? deviceData.minTemp : heatingSetPoint
-    heatingSetPoint = (heatingSetPoint > deviceData.maxTemp)? deviceData.maxTemp : heatingSetPoint
-  */
+  
   parent.setDeviceSetPoint(this.device, setPoint)
   sendEvent(name: "heatingSetpoint", value: setPoint, unit: "F")
 }
@@ -126,9 +125,12 @@ def heatLevelDown() {
 }
 
 def updateDeviceData(data) {
-  state.data = data;
-  sendEvent(name: "heatingSetpoint", value: data.setPoint, unit: "F")
-  sendEvent(name: "switch", value: data.isEnabled ? "on" : "off")
+  data.each { key, val ->
+    state["$key"] = val
+  }
+  log.debug 'state: ' + state
+  sendEvent(name: "heatingSetpoint", value: state.data.setPoint, unit: "F")
+  sendEvent(name: "switch", value: state.data.isEnabled ? "on" : "off")
 }
 
 def getTempColors() {
